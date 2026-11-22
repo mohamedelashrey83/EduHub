@@ -1,0 +1,135 @@
+@model EduHub.Web.ViewModels.CartViewModel
+@{
+    ViewData["Title"] = "Shopping Cart - EduHub";
+}
+
+<div class="container-fluid px-lg-5 py-5">
+    <h2 class="fw-bold mb-4">Shopping Cart</h2>
+
+    @if (!Model.Items.Any())
+    {
+        <div class="card border-0 shadow-sm p-5 text-center rounded-4 bg-white" style="max-width: 650px; margin: 0 auto;">
+            <div class="text-muted fs-1 mb-3"><i class="bi bi-cart-x"></i></div>
+            <h4 class="fw-bold">Your cart is currently empty</h4>
+            <p class="text-muted small mb-4">Explore thousands of industry-leading courses and master high-demand skills.</p>
+            <div>
+                <a asp-controller="Courses" asp-action="Index" class="btn btn-primary rounded-pill px-4 py-2">
+                    <i class="bi bi-search me-1"></i> Browse Catalog
+                </a>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="row g-5">
+            <!-- Items Column -->
+            <div class="col-lg-8">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <span class="text-muted small fw-semibold">@Model.Items.Count Course(s) in Cart</span>
+                    <form asp-action="Clear" method="post">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="btn btn-link text-danger p-0 small text-decoration-none">
+                            <i class="bi bi-trash"></i> Empty Cart
+                        </button>
+                    </form>
+                </div>
+
+                <div class="d-flex flex-column gap-3 mb-4">
+                    @foreach (var item in Model.Items)
+                    {
+                        <div class="card border-0 shadow-sm p-3 rounded-4 bg-white">
+                            <div class="row align-items-center g-3">
+                                <div class="col-3 col-sm-2">
+                                    <img src="@(string.IsNullOrEmpty(item.ThumbnailUrl) ? "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=300" : item.ThumbnailUrl)" alt="@item.Title" class="rounded-3 img-fluid object-fit-cover" style="aspect-ratio: 16/9;">
+                                </div>
+                                <div class="col-6 col-sm-7">
+                                    <h6 class="fw-bold text-dark mb-1">
+                                        <a asp-controller="Courses" asp-action="Details" asp-route-id="@item.CourseId" class="text-dark text-decoration-none">
+                                            @item.Title
+                                        </a>
+                                    </h6>
+                                    <div class="small text-muted mb-1">By @item.InstructorName</div>
+                                    <span class="badge bg-light text-dark border small">@item.Level</span>
+                                </div>
+                                <div class="col-3 col-sm-3 text-end">
+                                    <div class="fw-bold text-dark fs-5 mb-1">$@item.EffectivePrice.ToString("F2")</div>
+                                    @if (item.OriginalPrice > item.EffectivePrice)
+                                    {
+                                        <div class="text-muted text-decoration-line-through small mb-2">$@item.OriginalPrice.ToString("F2")</div>
+                                    }
+                                    <form asp-action="Remove" method="post">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="courseId" value="@item.CourseId" />
+                                        <button type="submit" class="btn btn-link text-danger p-0 small text-decoration-none">
+                                            Remove
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- Summary & Pricing Strategy Column -->
+            <div class="col-lg-4">
+                <div class="card border-0 shadow-sm p-4 rounded-4 bg-white sticky-top" style="top: 85px;">
+                    <h5 class="fw-bold mb-3">Order Summary</h5>
+
+                    <!-- Pricing Strategy Pattern Details -->
+                    @if (!string.IsNullOrEmpty(Model.PricingStrategyApplied))
+                    {
+                        <div class="alert alert-primary border-0 small mb-3 p-3 rounded-3">
+                            <div class="fw-bold"><i class="bi bi-tag-fill me-1"></i> Strategy Applied:</div>
+                            <div class="text-dark">@Model.PricingStrategyApplied</div>
+                            <div class="text-muted small mt-1">@Model.PricingDescription</div>
+                        </div>
+                    }
+
+                    <div class="d-flex justify-content-between text-muted small mb-2">
+                        <span>Original Total:</span>
+                        <span>$@Model.SubTotal.ToString("F2")</span>
+                    </div>
+
+                    @if (Model.TotalDiscount > 0)
+                    {
+                        <div class="d-flex justify-content-between text-success small mb-2">
+                            <span>Promotional Savings:</span>
+                            <span class="fw-bold">-$@Model.TotalDiscount.ToString("F2")</span>
+                        </div>
+                    }
+
+                    <hr class="my-3">
+
+                    <div class="d-flex justify-content-between align-items-baseline mb-4">
+                        <span class="fs-5 fw-bold text-dark">Total:</span>
+                        <span class="display-6 fw-bold text-dark">$@Model.FinalTotal.ToString("F2")</span>
+                    </div>
+
+                    <!-- Checkout Button -->
+                    <form asp-controller="Checkout" asp-action="ProcessCheckout" method="post" class="mb-3">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="btn btn-primary btn-lg w-100 py-3 fw-bold rounded-pill shadow-sm">
+                            <i class="bi bi-lock-fill me-1"></i> Proceed to Checkout
+                        </button>
+                    </form>
+
+                    <!-- Coupon Code Input -->
+                    <div class="border-top pt-3">
+                        <label class="form-label small fw-bold text-dark">Promotional Code</label>
+                        <form asp-action="ApplyCoupon" method="post">
+                            @Html.AntiForgeryToken()
+                            <div class="input-group">
+                                <input type="text" name="couponCode" class="form-control" placeholder="e.g. WELCOME50, SAVE20" value="@Model.CouponCode" />
+                                <button type="submit" class="btn btn-outline-primary">Apply</button>
+                            </div>
+                        </form>
+                        <div class="form-text small text-muted mt-2">
+                            Try demo coupons: <span class="badge bg-light text-dark border">WELCOME50</span> (50% off) or <span class="badge bg-light text-dark border">SAVE20</span> ($20 off).
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>

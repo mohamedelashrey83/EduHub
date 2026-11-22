@@ -1,0 +1,37 @@
+@{
+    ViewData["Title"] = "Contact & Support - EduHub";
+}
+
+<div class="container py-5" style="max-width: 700px;">
+    <div class="card border-0 shadow-sm p-4 p-md-5 rounded-4 bg-white">
+        <h2 class="fw-bold mb-2">Get in Touch</h2>
+        <p class="text-muted small mb-4">Have questions about EduHub courses, enterprise licensing, or instructor onboarding? Send us a message.</p>
+
+        <form method="post" onsubmit="event.preventDefault(); alert('Thank you! Your message has been sent to the EduHub support team.'); this.reset();">
+            <div class="row g-3 mb-3">
+                <div class="col-md-6">
+                    <label class="form-label small fw-bold">Your Name *</label>
+                    <input type="text" class="form-control" placeholder="Alex Morgan" required />
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label small fw-bold">Email Address *</label>
+                    <input type="email" class="form-control" placeholder="alex@company.com" required />
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label small fw-bold">Subject *</label>
+                <input type="text" class="form-control" placeholder="Course inquiry or technical question" required />
+            </div>
+
+            <div class="mb-4">
+                <label class="form-label small fw-bold">Message *</label>
+                <textarea class="form-control" rows="4" placeholder="How can we help you today?" required></textarea>
+            </div>
+
+            <button type="submit" class="btn btn-primary rounded-pill px-5 py-2 fw-semibold">
+                Send Message <i class="bi bi-send ms-1"></i>
+            </button>
+        </form>
+    </div>
+</div>

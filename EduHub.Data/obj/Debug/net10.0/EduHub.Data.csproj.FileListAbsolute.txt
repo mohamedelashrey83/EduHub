@@ -1,0 +1,15 @@
+C:\Users\moham\.gemini\antigravity\scratch\EduHub\EduHub.Data\bin\Debug\net10.0\EduHub.Data.deps.json
+C:\Users\moham\.gemini\antigravity\scratch\EduHub\EduHub.Data\bin\Debug\net10.0\EduHub.Data.dll
+C:\Users\moham\.gemini\antigravity\scratch\EduHub\EduHub.Data\bin\Debug\net10.0\EduHub.Data.pdb
+C:\Users\moham\.gemini\antigravity\scratch\EduHub\EduHub.Data\bin\Debug\net10.0\EduHub.Core.dll
+C:\Users\moham\.gemini\antigravity\scratch\EduHub\EduHub.Data\bin\Debug\net10.0\EduHub.Core.pdb
+C:\Users\moham\.gemini\antigravity\scratch\EduHub\EduHub.Data\obj\Debug\net10.0\EduHub.Data.csproj.AssemblyReference.cache
+C:\Users\moham\.gemini\antigravity\scratch\EduHub\EduHub.Data\obj\Debug\net10.0\EduHub.Data.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\moham\.gemini\antigravity\scratch\EduHub\EduHub.Data\obj\Debug\net10.0\EduHub.Data.AssemblyInfoInputs.cache
+C:\Users\moham\.gemini\antigravity\scratch\EduHub\EduHub.Data\obj\Debug\net10.0\EduHub.Data.AssemblyInfo.cs
+C:\Users\moham\.gemini\antigravity\scratch\EduHub\EduHub.Data\obj\Debug\net10.0\EduHub.Data.csproj.CoreCompileInputs.cache
+C:\Users\moham\.gemini\antigravity\scratch\EduHub\EduHub.Data\obj\Debug\net10.0\EduHub.D.D97FE768.Up2Date
+C:\Users\moham\.gemini\antigravity\scratch\EduHub\EduHub.Data\obj\Debug\net10.0\EduHub.Data.dll
+C:\Users\moham\.gemini\antigravity\scratch\EduHub\EduHub.Data\obj\Debug\net10.0\refint\EduHub.Data.dll
+C:\Users\moham\.gemini\antigravity\scratch\EduHub\EduHub.Data\obj\Debug\net10.0\EduHub.Data.pdb
+C:\Users\moham\.gemini\antigravity\scratch\EduHub\EduHub.Data\obj\Debug\net10.0\ref\EduHub.Data.dll

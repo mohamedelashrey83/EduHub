@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - EduHub Online Learning Platform</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Bootstrap 5 & Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet" />
+
+    <!-- Video.js -->
+    <link href="https://vjs.zencdn.net/8.10.0/video-js.css" rel="stylesheet" />
+
+    <!-- Custom Platform Styling -->
+    <style>
+        :root {
+            --primary-color: #6366f1;
+            --primary-hover: #4f46e5;
+            --secondary-color: #0ea5e9;
+            --accent-gold: #f59e0b;
+            --dark-navy: #0f172a;
+            --slate-bg: #f8fafc;
+            --card-border: #e2e8f0;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            color: #334155;
+            background-color: var(--slate-bg);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        h1, h2, h3, h4, h5, h6, .navbar-brand {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-weight: 700;
+        }
+
+        .navbar-eduhub {
+            background-color: #ffffff;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+            padding: 0.85rem 1.5rem;
+        }
+
+        .brand-logo {
+            font-size: 1.45rem;
+            font-weight: 800;
+            color: var(--primary-color) !important;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            letter-spacing: -0.5px;
+        }
+
+        .brand-logo i {
+            font-size: 1.7rem;
+            color: var(--primary-color);
+        }
+
+        .search-box-header {
+            min-width: 320px;
+            position: relative;
+        }
+
+        .search-box-header .form-control {
+            border-radius: 50rem;
+            padding-left: 2.5rem;
+            background-color: #f1f5f9;
+            border-color: transparent;
+            font-size: 0.9rem;
+        }
+
+        .search-box-header .form-control:focus {
+            background-color: #ffffff;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+        }
+
+        .search-box-header i {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #94a3b8;
+        }
+
+        .nav-link {
+            font-weight: 500;
+            color: #475569;
+            padding: 0.5rem 0.85rem;
+            transition: color 0.2s ease;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            color: var(--primary-color);
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+            font-weight: 600;
+            padding: 0.55rem 1.25rem;
+            border-radius: 0.5rem;
+            transition: all 0.2s ease;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-hover);
+            border-color: var(--primary-hover);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.25);
+        }
+
+        .btn-outline-primary {
+            color: var(--primary-color);
+            border-color: #cbd5e1;
+            font-weight: 600;
+            border-radius: 0.5rem;
+        }
+
+        .btn-outline-primary:hover {
+            background-color: #f8fafc;
+            color: var(--primary-hover);
+            border-color: var(--primary-color);
+        }
+
+        /* Course Card Styling */
+        .course-card {
+            background: #ffffff;
+            border: 1px solid var(--card-border);
+            border-radius: 0.85rem;
+            overflow: hidden;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .course-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px -4px rgba(15, 23, 42, 0.08), 0 4px 6px -2px rgba(15, 23, 42, 0.04);
+            border-color: #cbd5e1;
+        }
+
+        .course-thumbnail-wrapper {
+            position: relative;
+            padding-top: 56.25%; /* 16:9 */
+            background-color: #0f172a;
+            overflow: hidden;
+        }
+
+        .course-thumbnail-wrapper img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+
+        .course-card:hover .course-thumbnail-wrapper img {
+            transform: scale(1.04);
+        }
+
+        .course-badge-level {
+            position: absolute;
+            top: 0.75rem;
+            left: 0.75rem;
+            font-size: 0.75rem;
+            font-weight: 700;
+            padding: 0.25rem 0.6rem;
+            border-radius: 50rem;
+            background: rgba(15, 23, 42, 0.8);
+            color: #ffffff;
+            backdrop-filter: blur(4px);
+        }
+
+        .badge-free {
+            background-color: #10b981 !important;
+            color: #ffffff;
+            font-weight: 700;
+        }
+
+        .rating-stars {
+            color: var(--accent-gold);
+            font-size: 0.85rem;
+        }
+
+        .main-content {
+            flex: 1 0 auto;
+        }
+
+        /* Footer */
+        .footer-eduhub {
+            background-color: var(--dark-navy);
+            color: #94a3b8;
+            padding: 4rem 0 2rem;
+            margin-top: auto;
+        }
+
+        .footer-eduhub h6 {
+            color: #ffffff;
+            font-size: 0.95rem;
+            letter-spacing: 0.5px;
+            margin-bottom: 1.25rem;
+        }
+
+        .footer-eduhub a {
+            color: #94a3b8;
+            text-decoration: none;
+            transition: color 0.2s ease;
+            font-size: 0.9rem;
+            display: inline-block;
+            margin-bottom: 0.5rem;
+        }
+
+        .footer-eduhub a:hover {
+            color: #ffffff;
+        }
+
+        /* Demo Switcher Bar */
+        .demo-bar {
+            background: linear-gradient(90deg, #1e293b 0%, #0f172a 100%);
+            color: #e2e8f0;
+            font-size: 0.82rem;
+            padding: 0.35rem 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+    </style>
+
+    @await RenderSectionAsync("Styles", required: false)
+</head>
+<body>
+
+    <!-- Demo Persona Bar -->
+    <div class="demo-bar d-flex justify-content-between align-items-center flex-wrap">
+        <div>
+            <span class="badge bg-primary me-2"><i class="bi bi-shield-check"></i> Project 3: EduHub</span>
+            <span class="text-white-50">Enterprise E-Learning Platform with N-Tier, Repository, Strategy & Observer Patterns</span>
+        </div>
+        <div class="d-flex align-items-center gap-2 mt-1 mt-md-0">
+            <span class="text-white-50 small me-1">Quick Demo Login:</span>
+            <form asp-controller="Account" asp-action="QuickDemoLogin" method="post" class="d-inline">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="role" value="Admin" />
+                <button type="submit" class="btn btn-xs btn-outline-danger py-0 px-2 rounded" style="font-size: 0.75rem;">
+                    <i class="bi bi-person-fill-gear"></i> Admin
+                </button>
+            </form>
+            <form asp-controller="Account" asp-action="QuickDemoLogin" method="post" class="d-inline">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="role" value="Instructor" />
+                <button type="submit" class="btn btn-xs btn-outline-warning py-0 px-2 rounded text-warning" style="font-size: 0.75rem;">
+                    <i class="bi bi-person-workspace"></i> Instructor
+                </button>
+            </form>
+            <form asp-controller="Account" asp-action="QuickDemoLogin" method="post" class="d-inline">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="role" value="Student" />
+                <button type="submit" class="btn btn-xs btn-outline-info py-0 px-2 rounded text-info" style="font-size: 0.75rem;">
+                    <i class="bi bi-mortarboard"></i> Student
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Main Navigation Header -->
+    @if (ViewData["HideNavbar"] as bool? != true)
+    {
+    <nav class="navbar navbar-expand-lg navbar-eduhub sticky-top">
+        <div class="container-fluid px-lg-4">
+            <!-- Brand -->
+            <a class="navbar-brand brand-logo" asp-controller="Home" asp-action="Index">
+                <i class="bi bi-mortarboard-fill"></i>
+                <span>EduHub</span>
+            </a>
+
+            <!-- Mobile Toggle -->
+            <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <!-- Links & Search -->
+            <div class="collapse navbar-collapse" id="navbarContent">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0 align-items-lg-center">
+                    <li class="nav-item">
+                        <a class="nav-link" asp-controller="Courses" asp-action="Index">
+                            <i class="bi bi-grid-3x3-gap-fill me-1 text-primary"></i> Explore Courses
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" asp-controller="Certificate" asp-action="Verify">
+                            <i class="bi bi-patch-check-fill me-1 text-warning"></i> Verify Certificate
+                        </a>
+                    </li>
+                    <li class="nav-item d-none d-lg-block ms-3">
+                        <form asp-controller="Courses" asp-action="Index" method="get" class="search-box-header">
+                            <i class="bi bi-search"></i>
+                            <input class="form-control" type="search" name="search" placeholder="Search for courses, technologies, architectures..." aria-label="Search">
+                        </form>
+                    </li>
+                </ul>
+
+                <ul class="navbar-nav ms-auto mb-2 mb-lg-0 align-items-lg-center gap-2">
+                    <!-- Instructor Portal Link -->
+                    @if (User.IsInRole("Instructor") || User.IsInRole("Admin"))
+                    {
+                        <li class="nav-item">
+                            <a class="nav-link fw-semibold text-primary" asp-controller="Instructor" asp-action="Index">
+                                <i class="bi bi-person-video3 me-1"></i> Instructor Dashboard
+                            </a>
+                        </li>
+                    }
+                    else
+                    {
+                        <li class="nav-item">
+                            <a class="nav-link text-muted" asp-controller="Account" asp-action="Register">Teach on EduHub</a>
+                        </li>
+                    }
+
+                    <!-- Admin Portal Link -->
+                    @if (User.IsInRole("Admin"))
+                    {
+                        <li class="nav-item">
+                            <a class="btn btn-sm btn-outline-danger fw-semibold px-2 py-1" asp-controller="Admin" asp-action="Index">
+                                <i class="bi bi-speedometer2 me-1"></i> Admin Console
+                            </a>
+                        </li>
+                    }
+
+                    <!-- Student My Learning -->
+                    @if (User.Identity?.IsAuthenticated == true)
+                    {
+                        <li class="nav-item">
+                            <a class="nav-link" asp-controller="Learning" asp-action="MyCourses">
+                                <i class="bi bi-collection-play me-1"></i> My Learning
+                            </a>
+                        </li>
+                    }
+
+                    <!-- Cart -->
+                    <li class="nav-item">
+                        <a class="nav-link position-relative px-2" asp-controller="Cart" asp-action="Index" title="Shopping Cart">
+                            <i class="bi bi-cart3 fs-5"></i>
+                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-primary" id="cartBadge" style="font-size: 0.7rem;">
+                                Cart
+                            </span>
+                        </a>
+                    </li>
+
+                    <!-- User Account / Auth -->
+                    @if (User.Identity?.IsAuthenticated == true)
+                    {
+                        <li class="nav-item dropdown ms-lg-2">
+                            <a class="nav-link dropdown-toggle d-flex align-items-center gap-2 py-0" href="#" id="userMenu" data-bs-toggle="dropdown" aria-expanded="false">
+                                <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center fw-bold" style="width: 38px; height: 38px; font-size: 0.95rem;">
+                                    @(User.Identity.Name?[..1].ToUpper() ?? "U")
+                                </div>
+                                <span class="d-none d-md-inline fw-semibold small">@User.Identity.Name</span>
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 py-2" aria-labelledby="userMenu">
+                                <li class="px-3 py-2 border-bottom">
+                                    <div class="fw-bold text-dark">@User.Identity.Name</div>
+                                    <div class="small text-muted">Active Member</div>
+                                </li>
+                                <li><a class="dropdown-item py-2" asp-controller="Account" asp-action="Profile"><i class="bi bi-person me-2 text-primary"></i> My Profile</a></li>
+                                <li><a class="dropdown-item py-2" asp-controller="Learning" asp-action="MyCourses"><i class="bi bi-journal-bookmark me-2 text-info"></i> Enrolled Courses</a></li>
+                                <li><a class="dropdown-item py-2" asp-controller="Checkout" asp-action="History"><i class="bi bi-receipt me-2 text-success"></i> Purchase History</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li>
+                                    <form asp-controller="Account" asp-action="Logout" method="post" class="px-2">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="dropdown-item text-danger rounded py-2">
+                                            <i class="bi bi-box-arrow-right me-2"></i> Sign Out
+                                        </button>
+                                    </form>
+                                </li>
+                            </ul>
+                        </li>
+                    }
+                    else
+                    {
+                        <li class="nav-item ms-lg-2">
+                            <a class="btn btn-outline-primary" asp-controller="Account" asp-action="Login">Log in</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="btn btn-primary" asp-controller="Account" asp-action="Register">Sign up</a>
+                        </li>
+                    }
+                </ul>
+            </div>
+        </div>
+    </nav>
+    }
+
+    <!-- Global Alert Banners -->
+    @if (TempData["SuccessMessage"] != null || TempData["ErrorMessage"] != null || TempData["InfoMessage"] != null)
+    {
+        <div class="container-fluid px-lg-4 mt-3">
+            @if (TempData["SuccessMessage"] != null)
+            {
+                <div class="alert alert-success alert-dismissible fade show border-0 shadow-sm d-flex align-items-center gap-2" role="alert">
+                    <i class="bi bi-check-circle-fill fs-5 text-success"></i>
+                    <div>@TempData["SuccessMessage"]</div>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            }
+            @if (TempData["ErrorMessage"] != null)
+            {
+                <div class="alert alert-danger alert-dismissible fade show border-0 shadow-sm d-flex align-items-center gap-2" role="alert">
+                    <i class="bi bi-exclamation-triangle-fill fs-5 text-danger"></i>
+                    <div>@TempData["ErrorMessage"]</div>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            }
+            @if (TempData["InfoMessage"] != null)
+            {
+                <div class="alert alert-info alert-dismissible fade show border-0 shadow-sm d-flex align-items-center gap-2" role="alert">
+                    <i class="bi bi-info-circle-fill fs-5 text-info"></i>
+                    <div>@TempData["InfoMessage"]</div>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            }
+        </div>
+    }
+
+    <!-- Main Content Body -->
+    <main role="main" class="main-content @(ViewData["HideFooter"] as bool? == true ? "" : "pb-5")">
+        @RenderBody()
+    </main>
+
+    <!-- Platform Footer -->
+    @if (ViewData["HideFooter"] as bool? != true)
+    {
+    <footer class="footer-eduhub">
+        <div class="container-fluid px-lg-5">
+            <div class="row g-4 mb-5">
+                <div class="col-lg-4 col-md-6">
+                    <div class="brand-logo text-white mb-3">
+                        <i class="bi bi-mortarboard-fill text-white"></i>
+                        <span>EduHub</span>
+                    </div>
+                    <p class="small text-secondary pe-lg-4">
+                        EduHub is an enterprise online learning platform empowering students to master software architecture, cloud engineering, and design patterns through interactive video classrooms, quizzes, and automated PDF certification.
+                    </p>
+                    <div class="d-flex gap-3 text-secondary mt-3">
+                        <a href="#" class="fs-5"><i class="bi bi-twitter-x"></i></a>
+                        <a href="#" class="fs-5"><i class="bi bi-linkedin"></i></a>
+                        <a href="#" class="fs-5"><i class="bi bi-github"></i></a>
+                        <a href="#" class="fs-5"><i class="bi bi-youtube"></i></a>
+                    </div>
+                </div>
+
+                <div class="col-lg-2 col-md-6 col-6">
+                    <h6>Featured Topics</h6>
+                    <ul class="list-unstyled">
+                        <li><a asp-controller="Courses" asp-action="Index" asp-route-categoryId="1">Web Development</a></li>
+                        <li><a asp-controller="Courses" asp-action="Index" asp-route-categoryId="2">Cloud & DevOps</a></li>
+                        <li><a asp-controller="Courses" asp-action="Index" asp-route-categoryId="3">Software Architecture</a></li>
+                        <li><a asp-controller="Courses" asp-action="Index" asp-route-categoryId="4">Data Science & AI</a></li>
+                    </ul>
+                </div>
+
+                <div class="col-lg-2 col-md-6 col-6">
+                    <h6>Platform</h6>
+                    <ul class="list-unstyled">
+                        <li><a asp-controller="Courses" asp-action="Index">Course Catalog</a></li>
+                        <li><a asp-controller="Certificate" asp-action="Verify">Verify Certificate</a></li>
+                        <li><a asp-controller="Account" asp-action="Register">Teach on EduHub</a></li>
+                        <li><a asp-controller="Home" asp-action="About">Architecture & Setup</a></li>
+                    </ul>
+                </div>
+
+                <div class="col-lg-4 col-md-6">
+                    <h6>Enterprise Design Patterns</h6>
+                    <p class="small text-secondary mb-3">
+                        Built with <strong>NTier Architecture</strong>, <strong>Repository & Unit of Work</strong>, <strong>Strategy Pattern</strong> for pricing, and <strong>Observer Pattern</strong> for progress tracking.
+                    </p>
+                    <div class="p-3 rounded bg-dark border border-secondary border-opacity-25">
+                        <div class="small fw-bold text-white mb-1"><i class="bi bi-award text-warning me-1"></i> Automated Certification</div>
+                        <div class="text-secondary small">iTextSharp PDF generation with digital signature & verification codes.</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pt-4 border-top border-secondary border-opacity-25 d-flex flex-wrap justify-content-between align-items-center small text-secondary">
+                <div>&copy; 2026 EduHub Academy Inc. All rights reserved.</div>
+                <div class="d-flex gap-3 mt-2 mt-md-0">
+                    <a asp-controller="Home" asp-action="Privacy">Privacy Policy</a>
+                    <a href="#">Terms of Service</a>
+                    <a asp-controller="Home" asp-action="Contact">Support</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+    }
+
+    <!-- Bootstrap 5 Bundle JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Video.js -->
+    <script src="https://vjs.zencdn.net/8.10.0/video.min.js"></script>
+
+    <!-- SortableJS for drag-and-drop curriculum builder -->
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
+
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

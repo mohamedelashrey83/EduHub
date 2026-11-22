@@ -1,0 +1,70 @@
+@model EduHub.Core.Entities.Quiz
+@{
+    ViewData["Title"] = $"Quiz: {Model.Title}";
+    var pastAttempts = ViewBag.PastAttempts as IEnumerable<EduHub.Core.Entities.QuizAttempt> ?? Enumerable.Empty<EduHub.Core.Entities.QuizAttempt>();
+}
+
+<div class="container py-5" style="max-width: 860px;">
+    <!-- Quiz Header -->
+    <div class="card border-0 shadow-sm p-4 rounded-4 bg-white mb-4">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+            <span class="badge bg-warning bg-opacity-25 text-dark fw-bold px-3 py-2 rounded-pill">
+                <i class="bi bi-question-diamond-fill text-warning me-1"></i> Knowledge Checkpoint
+            </span>
+            <span class="small text-muted fw-semibold">Passing Grade: @Model.PassingScorePercentage%</span>
+        </div>
+        <h2 class="fw-bold mb-2">@Model.Title</h2>
+        <p class="text-secondary small mb-0">@(string.IsNullOrEmpty(Model.Description) ? "Answer all questions below to verify your mastery of the concepts covered in this module." : Model.Description)</p>
+    </div>
+
+    <!-- Quiz Taking Form -->
+    <form asp-action="SubmitQuiz" asp-route-id="@Model.Id" method="post">
+        @Html.AntiForgeryToken()
+
+        <div class="d-flex flex-column gap-4 mb-4">
+            @for (int i = 0; i < Model.Questions.Count; i++)
+            {
+                var q = Model.Questions.ElementAt(i);
+                int qNum = i + 1;
+
+                <div class="card border-0 shadow-sm p-4 rounded-4 bg-white">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <span class="badge bg-light text-dark border px-2 py-1">Question @qNum of @Model.Questions.Count</span>
+                        <span class="small text-muted">@q.Points point(s)</span>
+                    </div>
+
+                    <h5 class="fw-bold mb-3 text-dark">@q.QuestionText</h5>
+
+                    @if (q.QuestionType == EduHub.Core.Enums.QuestionType.MultipleChoice || q.QuestionType == EduHub.Core.Enums.QuestionType.TrueFalse)
+                    {
+                        <div class="d-flex flex-column gap-2">
+                            @foreach (var answer in q.Answers)
+                            {
+                                <div class="p-3 rounded-3 border bg-light d-flex align-items-center gap-3">
+                                    <input class="form-check-input" type="radio" name="question_@q.Id" id="ans_@answer.Id" value="@answer.AnswerText" required>
+                                    <label class="form-check-label w-100 cursor-pointer small fw-semibold text-dark" for="ans_@answer.Id">
+                                        @answer.AnswerText
+                                    </label>
+                                </div>
+                            }
+                        </div>
+                    }
+                    else // Fill in blank
+                    {
+                        <div class="mb-2">
+                            <label class="form-label small text-muted">Type your answer below:</label>
+                            <input type="text" name="question_@q.Id" class="form-control" placeholder="Type answer here..." required />
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+
+        <div class="d-flex justify-content-between align-items-center">
+            <a href="javascript:history.back()" class="btn btn-outline-secondary rounded-pill px-4">Cancel</a>
+            <button type="submit" class="btn btn-primary btn-lg rounded-pill px-5 shadow-sm">
+                Submit Quiz Answers <i class="bi bi-arrow-right ms-1"></i>
+            </button>
+        </div>
+    </form>
+</div>

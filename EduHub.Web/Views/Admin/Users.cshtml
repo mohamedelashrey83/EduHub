@@ -1,0 +1,65 @@
+@model IEnumerable<(EduHub.Core.Entities.ApplicationUser User, IList<string> Roles)>
+@{
+    ViewData["Title"] = "User Management - Admin";
+}
+
+<div class="container-fluid px-lg-5 py-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold mb-1">User Management</h2>
+            <p class="text-muted small mb-0">View registered students, instructors, and system administrators.</p>
+        </div>
+        <a asp-action="Index" class="btn btn-outline-secondary rounded-pill px-3">
+            <i class="bi bi-arrow-left me-1"></i> Dashboard
+        </a>
+    </div>
+
+    <div class="card border-0 shadow-sm rounded-4 overflow-hidden bg-white">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-4">User</th>
+                        <th>Email</th>
+                        <th>Roles</th>
+                        <th>Headline / Bio</th>
+                        <th>Earnings</th>
+                        <th>Joined</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        var u = item.User;
+                        <tr>
+                            <td class="ps-4">
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="rounded-circle bg-primary bg-opacity-10 text-primary fw-bold d-flex align-items-center justify-content-center" style="width: 38px; height: 38px;">
+                                        @(u.FullName?[..1].ToUpper() ?? "U")
+                                    </div>
+                                    <div class="fw-bold text-dark">@u.FullName</div>
+                                </div>
+                            </td>
+                            <td class="small text-muted">@u.Email</td>
+                            <td>
+                                @foreach (var role in item.Roles)
+                                {
+                                    <span class="badge @(role == "Admin" ? "bg-danger" : (role == "Instructor" ? "bg-warning text-dark" : "bg-primary")) me-1">
+                                        @role
+                                    </span>
+                                }
+                            </td>
+                            <td class="small text-secondary line-clamp-1" style="max-width: 250px;">
+                                @(u.Headline ?? u.Bio ?? "Member")
+                            </td>
+                            <td class="fw-bold text-dark">
+                                @(u.TotalEarnings > 0 ? $"${u.TotalEarnings:N2}" : "-")
+                            </td>
+                            <td class="small text-muted">@u.CreatedAt.ToString("MMM dd, yyyy")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

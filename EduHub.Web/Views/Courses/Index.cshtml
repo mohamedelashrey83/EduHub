@@ -1,0 +1,227 @@
+@model EduHub.Web.ViewModels.CourseCatalogViewModel
+@{
+    ViewData["Title"] = "Course Catalog - EduHub";
+}
+
+<div class="container-fluid px-lg-5 py-4">
+    <!-- Breadcrumb & Title -->
+    <div class="row align-items-center mb-4">
+        <div class="col-md-8">
+            <h2 class="fw-bold mb-1">Explore Courses</h2>
+            <p class="text-muted small mb-0">Showing @Model.TotalCount courses matching your criteria</p>
+        </div>
+        <div class="col-md-4 text-md-end mt-3 mt-md-0">
+            <!-- Sort dropdown -->
+            <form method="get" class="d-inline-flex align-items-center gap-2">
+                <input type="hidden" name="categoryId" value="@Model.SelectedCategoryId" />
+                <input type="hidden" name="search" value="@Model.SearchQuery" />
+                <input type="hidden" name="level" value="@Model.SelectedLevel" />
+                <input type="hidden" name="isFree" value="@Model.IsFree" />
+                <label class="small text-muted text-nowrap fw-semibold">Sort by:</label>
+                <select name="sortBy" class="form-select form-select-sm" onchange="this.form.submit()">
+                    <option value="" selected="@(string.IsNullOrEmpty(Model.SortBy))">Newest First</option>
+                    <option value="popular" selected="@(Model.SortBy == "popular")">Most Popular</option>
+                    <option value="highest_rated" selected="@(Model.SortBy == "highest_rated")">Highest Rated</option>
+                    <option value="price_low_high" selected="@(Model.SortBy == "price_low_high")">Price: Low to High</option>
+                    <option value="price_high_low" selected="@(Model.SortBy == "price_high_low")">Price: High to Low</option>
+                </select>
+            </form>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Sidebar Filters -->
+        <div class="col-lg-3">
+            <div class="card border-0 shadow-sm p-4 rounded-4 bg-white sticky-top" style="top: 85px;">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="fw-bold mb-0"><i class="bi bi-funnel me-1 text-primary"></i> Filters</h5>
+                    <a asp-action="Index" class="small text-decoration-none text-muted">Clear all</a>
+                </div>
+
+                <form method="get">
+                    <input type="hidden" name="sortBy" value="@Model.SortBy" />
+
+                    <!-- Search Input -->
+                    <div class="mb-4">
+                        <label class="form-label small fw-bold text-dark">Keyword Search</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-end-0"><i class="bi bi-search text-muted"></i></span>
+                            <input type="text" name="search" class="form-control border-start-0 bg-light" placeholder="e.g. ASP.NET, Azure" value="@Model.SearchQuery" />
+                        </div>
+                    </div>
+
+                    <!-- Category Filter -->
+                    <div class="mb-4">
+                        <label class="form-label small fw-bold text-dark">Categories</label>
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="radio" name="categoryId" id="cat_all" value="" @(Model.SelectedCategoryId == null ? "checked" : "") onchange="this.form.submit()">
+                            <label class="form-check-label small" for="cat_all">All Categories</label>
+                        </div>
+                        @foreach (var cat in Model.Categories.Where(c => c.ParentCategoryId == null))
+                        {
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="radio" name="categoryId" id="cat_@cat.Id" value="@cat.Id" @(Model.SelectedCategoryId == cat.Id ? "checked" : "") onchange="this.form.submit()">
+                                <label class="form-check-label small" for="cat_@cat.Id">
+                                    <i class="bi @cat.IconClass me-1 text-primary"></i> @cat.Name
+                                </label>
+                            </div>
+                        }
+                    </div>
+
+                    <!-- Level Filter -->
+                    <div class="mb-4">
+                        <label class="form-label small fw-bold text-dark">Experience Level</label>
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="radio" name="level" id="level_all" value="" @(Model.SelectedLevel == null ? "checked" : "") onchange="this.form.submit()">
+                            <label class="form-check-label small" for="level_all">All Levels</label>
+                        </div>
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="radio" name="level" id="level_beg" value="Beginner" @(Model.SelectedLevel == EduHub.Core.Enums.CourseLevel.Beginner ? "checked" : "") onchange="this.form.submit()">
+                            <label class="form-check-label small" for="level_beg">Beginner</label>
+                        </div>
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="radio" name="level" id="level_int" value="Intermediate" @(Model.SelectedLevel == EduHub.Core.Enums.CourseLevel.Intermediate ? "checked" : "") onchange="this.form.submit()">
+                            <label class="form-check-label small" for="level_int">Intermediate</label>
+                        </div>
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="radio" name="level" id="level_adv" value="Advanced" @(Model.SelectedLevel == EduHub.Core.Enums.CourseLevel.Advanced ? "checked" : "") onchange="this.form.submit()">
+                            <label class="form-check-label small" for="level_adv">Advanced</label>
+                        </div>
+                    </div>
+
+                    <!-- Price Filter -->
+                    <div class="mb-4">
+                        <label class="form-label small fw-bold text-dark">Price Type</label>
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="radio" name="isFree" id="price_all" value="" @(Model.IsFree == null ? "checked" : "") onchange="this.form.submit()">
+                            <label class="form-check-label small" for="price_all">All Courses</label>
+                        </div>
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="radio" name="isFree" id="price_free" value="true" @(Model.IsFree == true ? "checked" : "") onchange="this.form.submit()">
+                            <label class="form-check-label small text-success fw-semibold" for="price_free">Free Courses</label>
+                        </div>
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="radio" name="isFree" id="price_paid" value="false" @(Model.IsFree == false ? "checked" : "") onchange="this.form.submit()">
+                            <label class="form-check-label small" for="price_paid">Paid Courses</label>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-100 py-2">
+                        <i class="bi bi-filter me-1"></i> Apply Filters
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Course Cards Grid -->
+        <div class="col-lg-9">
+            @if (!Model.Courses.Any())
+            {
+                <div class="card border-0 shadow-sm p-5 text-center rounded-4 bg-white">
+                    <div class="fs-1 text-muted mb-3"><i class="bi bi-search"></i></div>
+                    <h4 class="fw-bold">No courses found</h4>
+                    <p class="text-muted">Try adjusting your filters or search keywords.</p>
+                    <div>
+                        <a asp-action="Index" class="btn btn-outline-primary px-4">Reset All Filters</a>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="row g-4">
+                    @foreach (var course in Model.Courses)
+                    {
+                        bool isEnrolled = Model.EnrolledCourseIds.Contains(course.Id);
+                        <div class="col-xl-4 col-md-6">
+                            <div class="course-card">
+                                <div class="course-thumbnail-wrapper">
+                                    <img src="@(string.IsNullOrEmpty(course.ThumbnailUrl) ? "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=600" : course.ThumbnailUrl)" alt="@course.Title" loading="lazy">
+                                    <span class="course-badge-level">@course.Level</span>
+                                    @if (isEnrolled)
+                                    {
+                                        <span class="badge bg-success position-absolute top-0 end-0 m-2 px-2 py-1 shadow-sm">
+                                            <i class="bi bi-check-circle-fill me-1"></i> Subscribed
+                                        </span>
+                                    }
+                                    else if (course.Price == 0 || (course.DiscountPrice.HasValue && course.DiscountPrice.Value == 0))
+                                    {
+                                        <span class="badge badge-free position-absolute top-0 end-0 m-2 px-2 py-1">FREE</span>
+                                    }
+                                </div>
+                                <div class="p-3 d-flex flex-column flex-grow-1">
+                                    <div class="text-muted small mb-1">@(course.Category?.Name ?? "General")</div>
+                                    <h6 class="fw-bold text-dark mb-1 line-clamp-2" style="min-height: 40px;">
+                                        <a asp-action="Details" asp-route-id="@course.Id" class="text-dark text-decoration-none">
+                                            @course.Title
+                                        </a>
+                                    </h6>
+                                    <div class="small text-muted mb-2">By @(course.Instructor?.FullName ?? "Instructor")</div>
+
+                                    <!-- Rating -->
+                                    <div class="d-flex align-items-center gap-1 mb-3">
+                                        <span class="fw-bold text-dark small">4.9</span>
+                                        <div class="rating-stars">
+                                            <i class="bi bi-star-fill"></i>
+                                            <i class="bi bi-star-fill"></i>
+                                            <i class="bi bi-star-fill"></i>
+                                            <i class="bi bi-star-fill"></i>
+                                            <i class="bi bi-star-half"></i>
+                                        </div>
+                                        <span class="text-muted small">(@(course.Reviews?.Count > 0 ? course.Reviews.Count : 38))</span>
+                                    </div>
+
+                                    <!-- Price & Cart -->
+                                    <div class="mt-auto pt-2 border-top d-flex justify-content-between align-items-center">
+                                        <div>
+                                            @if (isEnrolled)
+                                            {
+                                                <span class="badge bg-success bg-opacity-10 text-success fw-bold px-2 py-1">
+                                                    <i class="bi bi-check-circle-fill me-1"></i> Subscribed
+                                                </span>
+                                            }
+                                            else if (course.Price == 0 || (course.DiscountPrice.HasValue && course.DiscountPrice.Value == 0))
+                                            {
+                                                <span class="fw-bold text-success fs-5">Free</span>
+                                            }
+                                            else if (course.DiscountPrice.HasValue && course.DiscountPrice.Value < course.Price)
+                                            {
+                                                <span class="fw-bold text-dark fs-5">$@course.DiscountPrice.Value.ToString("F2")</span>
+                                                <span class="text-muted text-decoration-line-through small ms-1">$@course.Price.ToString("F2")</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="fw-bold text-dark fs-5">$@course.Price.ToString("F2")</span>
+                                            }
+                                        </div>
+
+                                        <div class="d-flex gap-2">
+                                            <a asp-action="Details" asp-route-id="@course.Id" class="btn btn-sm btn-outline-secondary rounded-pill px-2" title="Course Details">
+                                                <i class="bi bi-info-circle"></i>
+                                            </a>
+                                            @if (isEnrolled)
+                                            {
+                                                <a asp-controller="Learning" asp-action="Watch" asp-route-id="@course.Id" class="btn btn-sm btn-success rounded-pill px-3 fw-semibold shadow-sm" title="Go to Course">
+                                                    <i class="bi bi-play-circle-fill me-1"></i> Subscribed
+                                                </a>
+                                            }
+                                            else
+                                            {
+                                                <form asp-controller="Cart" asp-action="Add" method="post" class="d-inline">
+                                                    @Html.AntiForgeryToken()
+                                                    <input type="hidden" name="courseId" value="@course.Id" />
+                                                    <button type="submit" class="btn btn-sm btn-primary rounded-pill px-3" title="Add to Cart">
+                                                        <i class="bi bi-cart-plus me-1"></i> Add
+                                                    </button>
+                                                </form>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+</div>

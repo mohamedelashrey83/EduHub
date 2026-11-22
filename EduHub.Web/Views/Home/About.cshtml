@@ -1,0 +1,54 @@
+@{
+    ViewData["Title"] = "About Architecture - EduHub";
+}
+
+<div class="container py-5" style="max-width: 900px;">
+    <div class="card border-0 shadow-sm p-4 p-md-5 rounded-4 bg-white mb-4">
+        <span class="badge bg-primary bg-opacity-10 text-primary px-3 py-1 rounded-pill mb-2 fw-bold">Architecture & Design Principles</span>
+        <h2 class="fw-bold mb-3">About EduHub Enterprise Platform</h2>
+        <p class="lead text-secondary">
+            EduHub was engineered as a benchmark ASP.NET Core enterprise e-learning platform showcasing clean architectural patterns, high separation of concerns, and robust cloud media streaming.
+        </p>
+
+        <hr class="my-4">
+
+        <h4 class="fw-bold mb-3">Architectural Highlights & Patterns</h4>
+        <div class="row g-4 mb-4">
+            <div class="col-md-6">
+                <div class="p-3 rounded-3 bg-light border h-100">
+                    <h6 class="fw-bold text-primary mb-1"><i class="bi bi-layers me-1"></i> N-Tier Architecture</h6>
+                    <p class="small text-muted mb-0">Distinct boundary separation across Presentation (Web), Domain (Core), Business Logic (Services), and Data Access (Data).</p>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="p-3 rounded-3 bg-light border h-100">
+                    <h6 class="fw-bold text-primary mb-1"><i class="bi bi-database-check me-1"></i> Repository & Unit of Work</h6>
+                    <p class="small text-muted mb-0">Decouples data access from business logic and manages multiple transactional updates under atomic commits.</p>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="p-3 rounded-3 bg-light border h-100">
+                    <h6 class="fw-bold text-primary mb-1"><i class="bi bi-tag me-1"></i> Strategy Pattern</h6>
+                    <p class="small text-muted mb-0">Dynamic pricing strategy calculations enabling coupons, bundle tier discounts, and seasonal promotional sales.</p>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="p-3 rounded-3 bg-light border h-100">
+                    <h6 class="fw-bold text-primary mb-1"><i class="bi bi-bell me-1"></i> Observer Pattern</h6>
+                    <p class="small text-muted mb-0">Course completion subjects and progress listeners that trigger automatic PDF certification and student notifications.</p>
+                </div>
+            </div>
+        </div>
+
+        <h4 class="fw-bold mb-3">Technology Stack</h4>
+        <ul class="list-unstyled small text-secondary d-flex flex-column gap-2 mb-0">
+            <li><i class="bi bi-check-circle text-success me-2"></i> <strong>Backend:</strong> ASP.NET Core 10 MVC, C#, Entity Framework Core 10</li>
+            <li><i class="bi bi-check-circle text-success me-2"></i> <strong>Identity & Security:</strong> ASP.NET Core Identity with role-based access control (Student, Instructor, Admin)</li>
+            <li><i class="bi bi-check-circle text-success me-2"></i> <strong>Payment Gateway:</strong> Stripe integration supporting Checkout Sessions & sandbox simulation</li>
+            <li><i class="bi bi-check-circle text-success me-2"></i> <strong>Cloud Storage:</strong> Azure Blob Storage with signed SAS tokens & local fallback mode</li>
+            <li><i class="bi bi-check-circle text-success me-2"></i> <strong>PDF Certificates:</strong> iTextSharp for automated high-resolution PDF award generation</li>
+            <li><i class="bi bi-check-circle text-success me-2"></i> <strong>Video Player:</strong> Video.js with playback controls, bookmarking, and notes synchronization</li>
+            <li><i class="bi bi-check-circle text-success me-2"></i> <strong>Analytics & UI:</strong> Bootstrap 5, Bootstrap Icons, Chart.js, and SortableJS</li>
+        </ul>
+    </div>
+</div>

@@ -1,0 +1,73 @@
+@model EduHub.Core.Entities.Certificate?
+@{
+    ViewData["Title"] = "Credential Verification - EduHub";
+    string searchedCode = ViewBag.SearchedCode as string ?? "";
+}
+
+<div class="container py-5" style="max-width: 760px;">
+    <div class="text-center mb-5">
+        <div class="rounded-circle bg-warning bg-opacity-10 text-warning p-3 d-inline-flex mb-3">
+            <i class="bi bi-patch-check-fill fs-1"></i>
+        </div>
+        <h2 class="fw-bold mb-2">EduHub Credential Verification</h2>
+        <p class="text-muted small">Enter a certificate verification ID below to validate the authenticity of an EduHub completion award.</p>
+
+        <!-- Search Form -->
+        <form method="get" class="mt-4" style="max-width: 500px; margin: 0 auto;">
+            <div class="input-group input-group-lg shadow-sm rounded-pill overflow-hidden">
+                <input type="text" name="code" class="form-control border-0 bg-light px-4" placeholder="e.g. EDU-2026-X8Y7Z6" value="@searchedCode" required />
+                <button class="btn btn-primary px-4 fw-semibold" type="submit">
+                    <i class="bi bi-search me-1"></i> Verify
+                </button>
+            </div>
+        </form>
+    </div>
+
+    @if (!string.IsNullOrEmpty(searchedCode))
+    {
+        @if (Model != null)
+        {
+            <!-- Valid Verified Certificate Card -->
+            <div class="card border-0 shadow-lg rounded-4 overflow-hidden bg-white p-4 p-md-5 border-start border-success border-5">
+                <div class="d-flex align-items-center gap-2 text-success fw-bold mb-3">
+                    <i class="bi bi-shield-fill-check fs-4"></i>
+                    <span>AUTHENTIC VERIFIED CREDENTIAL</span>
+                </div>
+
+                <h3 class="fw-bold text-dark mb-1">@Model.StudentName</h3>
+                <p class="text-muted small mb-4">has demonstrated completion of all requirements for:</p>
+
+                <div class="p-3 rounded-3 bg-light border mb-4">
+                    <h5 class="fw-bold text-dark mb-1">@Model.CourseTitle</h5>
+                    <div class="small text-muted">Instructor: <strong>@Model.InstructorName</strong></div>
+                </div>
+
+                <div class="row g-3 small text-muted border-top pt-3">
+                    <div class="col-sm-6">
+                        <div>Certificate ID: <strong class="text-dark">@Model.CertificateCode</strong></div>
+                        <div>Issued On: <strong class="text-dark">@Model.IssuedAt.ToString("MMMM dd, yyyy")</strong></div>
+                    </div>
+                    <div class="col-sm-6 text-sm-end">
+                        <div>Issuer: <strong class="text-dark">EduHub Global Academy</strong></div>
+                        <div>Verification Status: <span class="badge bg-success">Verified Active</span></div>
+                    </div>
+                </div>
+
+                <div class="mt-4 text-center">
+                    <a asp-action="View" asp-route-id="@Model.Id" class="btn btn-outline-primary rounded-pill px-4">
+                        <i class="bi bi-eye me-1"></i> View Full Certificate
+                    </a>
+                </div>
+            </div>
+        }
+        else
+        {
+            <!-- Not Found Card -->
+            <div class="card border-0 shadow-sm p-5 text-center rounded-4 bg-white border-start border-danger border-5">
+                <div class="text-danger fs-1 mb-2"><i class="bi bi-exclamation-octagon-fill"></i></div>
+                <h4 class="fw-bold text-danger mb-1">Certificate Not Found</h4>
+                <p class="text-muted small mb-0">No matching credential was found for verification code <strong>@searchedCode</strong>. Please check the code and try again.</p>
+            </div>
+        }
+    }
+</div>

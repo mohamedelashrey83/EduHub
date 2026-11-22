@@ -1,0 +1,84 @@
+@model EduHub.Services.Interfaces.QuizEvaluationResultDto
+@{
+    ViewData["Title"] = $"Results: {Model.QuizTitle}";
+}
+
+<div class="container py-5" style="max-width: 860px;">
+    <!-- Score Card -->
+    <div class="card border-0 shadow-sm p-5 text-center rounded-4 bg-white mb-4">
+        @if (Model.IsPassed)
+        {
+            <div class="text-success fs-1 mb-2">
+                <i class="bi bi-patch-check-fill" style="font-size: 4rem;"></i>
+            </div>
+            <h2 class="fw-bold text-success mb-1">Congratulations! You Passed!</h2>
+            <p class="text-muted small">You demonstrated mastery of the subject material.</p>
+        }
+        else
+        {
+            <div class="text-danger fs-1 mb-2">
+                <i class="bi bi-x-circle-fill" style="font-size: 4rem;"></i>
+            </div>
+            <h2 class="fw-bold text-danger mb-1">Keep Practicing</h2>
+            <p class="text-muted small">You did not meet the passing grade of @Model.PassingScorePercentage% on this attempt.</p>
+        }
+
+        <div class="d-inline-flex justify-content-center align-items-baseline gap-2 my-3">
+            <span class="display-3 fw-bold @(Model.IsPassed ? "text-success" : "text-danger")">@Model.ScorePercentage%</span>
+            <span class="text-muted fs-5">(@Model.EarnedPoints / @Model.TotalPoints points)</span>
+        </div>
+
+        <div class="d-flex justify-content-center gap-3 mt-3">
+            <a asp-action="Quiz" asp-route-id="@Model.QuizId" class="btn btn-outline-primary rounded-pill px-4">
+                <i class="bi bi-arrow-repeat me-1"></i> Retake Quiz
+            </a>
+            <a asp-action="MyCourses" class="btn btn-primary rounded-pill px-4">
+                Return to Dashboard <i class="bi bi-arrow-right ms-1"></i>
+            </a>
+        </div>
+    </div>
+
+    <!-- Question Explanations -->
+    <h5 class="fw-bold mb-3">Detailed Explanations & Review</h5>
+    <div class="d-flex flex-column gap-3 mb-5">
+        @for (int i = 0; i < Model.QuestionResults.Count; i++)
+        {
+            var item = Model.QuestionResults[i];
+            int qNum = i + 1;
+
+            <div class="card border-0 shadow-sm p-4 rounded-4 bg-white @(item.IsCorrect ? "border-start border-success border-4" : "border-start border-danger border-4")">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                    <span class="fw-bold text-dark">Question @qNum: @item.QuestionText</span>
+                    @if (item.IsCorrect)
+                    {
+                        <span class="badge bg-success small"><i class="bi bi-check-lg"></i> Correct</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-danger small"><i class="bi bi-x-lg"></i> Incorrect</span>
+                    }
+                </div>
+
+                <div class="small mb-2">
+                    <span class="text-muted">Your Answer:</span>
+                    <strong class="@(item.IsCorrect ? "text-success" : "text-danger")">@item.StudentAnswer</strong>
+                </div>
+
+                @if (!item.IsCorrect)
+                {
+                    <div class="small mb-2">
+                        <span class="text-muted">Correct Answer:</span>
+                        <strong class="text-success">@item.CorrectAnswer</strong>
+                    </div>
+                }
+
+                @if (!string.IsNullOrEmpty(item.Explanation))
+                {
+                    <div class="p-3 bg-light rounded-3 text-secondary small mt-2">
+                        <i class="bi bi-lightbulb-fill text-warning me-1"></i> <strong>Explanation:</strong> @item.Explanation
+                    </div>
+                }
+            </div>
+        }
+    </div>
+</div>

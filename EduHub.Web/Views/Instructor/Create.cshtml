@@ -1,0 +1,121 @@
+@model EduHub.Web.ViewModels.CreateCourseViewModel
+@{
+    ViewData["Title"] = "Create New Course - EduHub";
+}
+
+<div class="container py-5" style="max-width: 860px;">
+    <div class="card border-0 shadow-sm p-4 p-md-5 rounded-4 bg-white">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <span class="badge bg-primary bg-opacity-10 text-primary px-3 py-1 rounded-pill mb-1">Step 1 of 2</span>
+                <h3 class="fw-bold mb-0">Course Information & Settings</h3>
+            </div>
+            <a asp-action="Courses" class="btn btn-outline-secondary rounded-pill px-3">Cancel</a>
+        </div>
+
+        <form asp-action="Create" method="post" enctype="multipart/form-data">
+            @Html.AntiForgeryToken()
+
+            <div class="mb-4">
+                <label asp-for="Title" class="form-label fw-bold">Course Title *</label>
+                <input asp-for="Title" class="form-control form-control-lg" placeholder="e.g. Enterprise ASP.NET Core & Clean Architecture" required />
+                <span asp-validation-for="Title" class="text-danger small"></span>
+            </div>
+
+            <div class="mb-4">
+                <label asp-for="Subtitle" class="form-label fw-bold">Course Subtitle</label>
+                <input asp-for="Subtitle" class="form-control" placeholder="A catchy one-line description of the course value proposition" />
+                <span asp-validation-for="Subtitle" class="text-danger small"></span>
+            </div>
+
+            <div class="row g-3 mb-4">
+                <div class="col-md-6">
+                    <label asp-for="CategoryId" class="form-label fw-bold">Primary Category *</label>
+                    <select asp-for="CategoryId" class="form-select" required>
+                        <option value="">-- Select Category --</option>
+                        @foreach (var cat in Model.AvailableCategories.Where(c => c.ParentCategoryId == null))
+                        {
+                            <option value="@cat.Id">@cat.Name</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="col-md-6">
+                    <label asp-for="Level" class="form-label fw-bold">Difficulty Level *</label>
+                    <select asp-for="Level" class="form-select" asp-items="Html.GetEnumSelectList<EduHub.Core.Enums.CourseLevel>()"></select>
+                </div>
+            </div>
+
+            <div class="row g-3 mb-4">
+                <div class="col-md-6">
+                    <label asp-for="Price" class="form-label fw-bold">Base Price (USD) *</label>
+                    <div class="input-group">
+                        <span class="input-group-text">$</span>
+                        <input asp-for="Price" class="form-control" type="number" step="0.01" min="0" placeholder="0.00" required />
+                    </div>
+                    <span class="form-text small text-muted">Set $0 for a completely free course.</span>
+                </div>
+
+                <div class="col-md-6">
+                    <label asp-for="DiscountPrice" class="form-label fw-bold">Discounted / Sale Price (USD)</label>
+                    <div class="input-group">
+                        <span class="input-group-text">$</span>
+                        <input asp-for="DiscountPrice" class="form-control" type="number" step="0.01" min="0" placeholder="Optional promo price" />
+                    </div>
+                </div>
+            </div>
+
+            <div class="mb-4">
+                <label asp-for="Description" class="form-label fw-bold">Detailed Description *</label>
+                <textarea asp-for="Description" class="form-control" rows="5" placeholder="Comprehensive course overview, syllabus objectives, and target audience..." required></textarea>
+                <span asp-validation-for="Description" class="text-danger small"></span>
+            </div>
+
+            <div class="row g-3 mb-4">
+                <div class="col-md-6">
+                    <label asp-for="WhatYouWillLearn" class="form-label fw-bold">What Students Will Learn</label>
+                    <textarea asp-for="WhatYouWillLearn" class="form-control" rows="4" placeholder="• Master N-Tier Architecture&#10;• Implement Repository Pattern&#10;• Deploy to Azure"></textarea>
+                    <span class="form-text small text-muted">Put each key bullet point on a new line.</span>
+                </div>
+
+                <div class="col-md-6">
+                    <label asp-for="Requirements" class="form-label fw-bold">Course Prerequisites</label>
+                    <textarea asp-for="Requirements" class="form-control" rows="4" placeholder="• Basic C# knowledge&#10;• Visual Studio 2022"></textarea>
+                </div>
+            </div>
+
+            <!-- Media Uploads (Azure Blob / Local Storage) -->
+            <div class="p-4 rounded-4 bg-light border mb-4">
+                <h5 class="fw-bold mb-3"><i class="bi bi-cloud-arrow-up text-primary me-2"></i> Media & Azure Blob Upload</h5>
+
+                <div class="row g-3 mb-3">
+                    <div class="col-md-6">
+                        <label class="form-label small fw-bold">Thumbnail Image File (Upload)</label>
+                        <input asp-for="ThumbnailFile" type="file" class="form-control" accept="image/*" />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label small fw-bold">Or Image URL</label>
+                        <input asp-for="ThumbnailUrl" type="url" class="form-control" placeholder="https://..." />
+                    </div>
+                </div>
+
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label small fw-bold">Promo Video File (Upload to Azure)</label>
+                        <input asp-for="PromoVideoFile" type="file" class="form-control" accept="video/*" />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label small fw-bold">Or Video Streaming URL</label>
+                        <input asp-for="PromoVideoUrl" type="url" class="form-control" placeholder="https://..." />
+                    </div>
+                </div>
+            </div>
+
+            <div class="d-flex justify-content-end gap-3">
+                <button type="submit" class="btn btn-primary btn-lg rounded-pill px-5 shadow-sm">
+                    Continue to Curriculum Builder <i class="bi bi-arrow-right ms-1"></i>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>

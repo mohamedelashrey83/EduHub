@@ -1,0 +1,69 @@
+@model EduHub.Core.Entities.Order
+@{
+    ViewData["Title"] = "Order Confirmation - EduHub";
+}
+
+<div class="container py-5" style="max-width: 800px;">
+    <!-- Success Card -->
+    <div class="card border-0 shadow-sm p-5 text-center rounded-4 bg-white mb-4">
+        <div class="text-success fs-1 mb-2">
+            <i class="bi bi-check-circle-fill" style="font-size: 4.5rem;"></i>
+        </div>
+        <h2 class="fw-bold text-dark mb-1">Thank You for Your Order!</h2>
+        <p class="text-muted small mb-4">Your payment has been successfully processed and your courses have been added to your learning dashboard.</p>
+
+        <div class="d-flex justify-content-center gap-3">
+            <a asp-controller="Learning" asp-action="MyCourses" class="btn btn-primary btn-lg rounded-pill px-5 shadow-sm">
+                <i class="bi bi-play-circle-fill me-2"></i> Go to My Courses
+            </a>
+            <a asp-action="History" class="btn btn-outline-secondary btn-lg rounded-pill px-4">
+                View Receipt
+            </a>
+        </div>
+    </div>
+
+    <!-- Order Receipt Summary -->
+    <div class="card border-0 shadow-sm p-4 rounded-4 bg-white">
+        <div class="d-flex justify-content-between align-items-center border-bottom pb-3 mb-3">
+            <div>
+                <h5 class="fw-bold mb-0">Receipt #ORD-@Model.Id</h5>
+                <span class="text-muted small">@Model.OrderDate.ToString("MMMM dd, yyyy - hh:mm tt")</span>
+            </div>
+            <span class="badge bg-success px-3 py-2 rounded-pill">Paid via @Model.PaymentMethod</span>
+        </div>
+
+        <div class="mb-4">
+            <h6 class="fw-bold small text-muted text-uppercase mb-3">Enrolled Courses</h6>
+            <div class="d-flex flex-column gap-2">
+                @foreach (var item in Model.OrderItems)
+                {
+                    <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
+                        <div>
+                            <div class="fw-bold text-dark small">@(item.Course?.Title ?? $"Course #{item.CourseId}")</div>
+                            <div class="text-muted small">Standard Enrollment</div>
+                        </div>
+                        <div class="fw-bold text-dark">$@((item.Price - item.DiscountApplied).ToString("F2"))</div>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <div class="border-top pt-3 d-flex flex-column gap-1 small text-muted">
+            <div class="d-flex justify-content-between">
+                <span>Subtotal:</span>
+                <span>$@Model.SubTotal.ToString("F2")</span>
+            </div>
+            @if (Model.DiscountAmount > 0)
+            {
+                <div class="d-flex justify-content-between text-success">
+                    <span>Discount Applied (@(Model.PricingStrategyUsed ?? "Promo")):</span>
+                    <span>-$@Model.DiscountAmount.ToString("F2")</span>
+                </div>
+            }
+            <div class="d-flex justify-content-between fw-bold text-dark fs-6 mt-2 pt-2 border-top">
+                <span>Total Paid:</span>
+                <span>$@Model.TotalAmount.ToString("F2")</span>
+            </div>
+        </div>
+    </div>
+</div>

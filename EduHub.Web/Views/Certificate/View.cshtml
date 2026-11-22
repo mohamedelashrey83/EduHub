@@ -1,0 +1,91 @@
+@model EduHub.Core.Entities.Certificate
+@{
+    ViewData["Title"] = $"Certificate - {Model.StudentName}";
+    var linkedInUrl = $"https://www.linkedin.com/profile/add?startTask=CERTIFICATION_NAME&name={Uri.EscapeDataString(Model.CourseTitle)}&organizationName={Uri.EscapeDataString("EduHub Academy")}&issueYear={Model.IssuedAt.Year}&issueMonth={Model.IssuedAt.Month}&certUrl={Uri.EscapeDataString(Context.Request.Scheme + "://" + Context.Request.Host + "/Certificate/Verify?code=" + Model.CertificateCode)}&certId={Uri.EscapeDataString(Model.CertificateCode)}";
+}
+
+<div class="container py-5" style="max-width: 900px;">
+    <!-- Action Bar -->
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+        <a asp-controller="Learning" asp-action="MyCourses" class="btn btn-outline-secondary rounded-pill px-3">
+            <i class="bi bi-arrow-left me-1"></i> Back to My Courses
+        </a>
+
+        <div class="d-flex gap-2">
+            <!-- Add to LinkedIn Button -->
+            <a href="@linkedInUrl" target="_blank" class="btn btn-primary rounded-pill px-4" style="background-color: #0077b5; border-color: #0077b5;">
+                <i class="bi bi-linkedin me-1"></i> Add to LinkedIn Profile
+            </a>
+
+            <!-- Download Official PDF -->
+            <a asp-action="Download" asp-route-id="@Model.Id" class="btn btn-dark rounded-pill px-4 shadow-sm">
+                <i class="bi bi-download me-1"></i> Download PDF
+            </a>
+        </div>
+    </div>
+
+    <!-- Official Certificate Frame -->
+    <div class="card border-0 shadow-lg rounded-4 overflow-hidden bg-white p-4 p-md-5 position-relative" style="border: 12px solid #0f172a !important; border-radius: 1.25rem !important;">
+        <!-- Inner Gold Border -->
+        <div class="border border-warning border-2 p-4 p-md-5 text-center position-relative">
+            <!-- Brand -->
+            <div class="text-warning fw-bold small text-uppercase letter-spacing mb-2">
+                ★ EduHub Online Learning Platform ★
+            </div>
+
+            <h1 class="display-5 fw-extrabold text-dark mb-2" style="font-family: 'Plus Jakarta Sans', sans-serif; letter-spacing: 1px;">
+                CERTIFICATE OF COMPLETION
+            </h1>
+
+            <p class="text-muted small text-uppercase letter-spacing mb-4">This is to proudly certify that</p>
+
+            <h2 class="display-6 fw-bold text-primary mb-3" style="font-family: Georgia, serif;">
+                @Model.StudentName
+            </h2>
+
+            <p class="text-secondary small mb-3">has successfully mastered all curriculum requirements and completed the online course</p>
+
+            <h3 class="fw-bold text-dark mb-4">
+                @Model.CourseTitle
+            </h3>
+
+            <hr class="my-4 mx-auto" style="max-width: 400px; border-color: #e2e8f0;">
+
+            <!-- Certificate Footer Details -->
+            <div class="row align-items-end g-4 pt-2">
+                <div class="col-md-4 text-md-start">
+                    <div class="small text-muted">Issue Date: <strong class="text-dark">@Model.IssuedAt.ToString("MMMM dd, yyyy")</strong></div>
+                    <div class="small text-muted">Verification ID: <strong class="text-dark">@Model.CertificateCode</strong></div>
+                    <div class="small text-muted">Status: <span class="badge bg-success-subtle text-success">Verified</span></div>
+                </div>
+
+                <div class="col-md-4 text-center">
+                    <div class="rounded-circle border border-warning p-3 d-inline-flex flex-column align-items-center justify-content-center bg-light shadow-sm" style="width: 100px; height: 100px;">
+                        <i class="bi bi-award-fill text-warning fs-2 mb-0"></i>
+                        <span style="font-size: 0.65rem;" class="fw-bold text-dark text-uppercase">Official</span>
+                    </div>
+                </div>
+
+                <div class="col-md-4 text-md-end">
+                    <div class="mb-1" style="font-family: 'Brush Script MT', cursive; font-size: 1.5rem; color: #1e293b;">
+                        @Model.InstructorName
+                    </div>
+                    <div class="border-top pt-1 small text-muted">
+                        <strong class="text-dark">@Model.InstructorName</strong><br>
+                        Course Instructor & Expert
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Verification Info Banner -->
+    <div class="text-center mt-4">
+        <span class="text-muted small">
+            Anyone can verify this credential online at:
+            <a asp-action="Verify" asp-route-code="@Model.CertificateCode" class="fw-bold text-primary">
+                /Certificate/Verify?code=@Model.CertificateCode
+            </a>
+        </span>
+    </div>
+</div>

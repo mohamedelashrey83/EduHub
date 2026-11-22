@@ -1,0 +1,284 @@
+@model EduHub.Web.ViewModels.AdminDashboardViewModel
+@{
+    ViewData["Title"] = "Admin Console & Analytics - EduHub";
+    var analytics = Model.Analytics;
+}
+
+<div class="container-fluid px-lg-5 py-5">
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+        <div>
+            <div class="badge bg-danger bg-opacity-10 text-danger rounded-pill px-3 py-1 mb-1 fw-bold">Platform Governance</div>
+            <h2 class="fw-bold mb-0">System Administration & Analytics</h2>
+            <p class="text-muted small">Real-time metrics, revenue trends, quality control, and platform operations.</p>
+        </div>
+
+        <div class="d-flex gap-2">
+            <a asp-action="Courses" class="btn btn-warning rounded-pill px-3 shadow-sm position-relative">
+                <i class="bi bi-shield-check me-1"></i> Course Approval Queue
+                @if (analytics.PendingApprovalCourses > 0)
+                {
+                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                        @analytics.PendingApprovalCourses
+                    </span>
+                }
+            </a>
+            <a asp-action="Users" class="btn btn-outline-secondary rounded-pill px-3">
+                <i class="bi bi-people me-1"></i> Users
+            </a>
+            <a asp-action="Categories" class="btn btn-outline-secondary rounded-pill px-3">
+                <i class="bi bi-tags me-1"></i> Categories
+            </a>
+            <a asp-action="Reports" class="btn btn-outline-secondary rounded-pill px-3">
+                <i class="bi bi-graph-up me-1"></i> Sales Reports
+            </a>
+        </div>
+    </div>
+
+    <!-- 4 KPI Cards -->
+    <div class="row g-4 mb-4">
+        <div class="col-sm-6 col-xl-3">
+            <div class="card border-0 shadow-sm p-4 rounded-4 bg-white">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="text-muted small fw-semibold">Platform Revenue</span>
+                    <div class="rounded-3 bg-success bg-opacity-10 text-success p-2">
+                        <i class="bi bi-currency-dollar fs-4"></i>
+                    </div>
+                </div>
+                <h3 class="fw-bold text-dark mb-0">$@analytics.TotalRevenue.ToString("N2")</h3>
+                <span class="text-muted small">Platform 30% share: <strong>$@((analytics.TotalRevenue * 0.30m).ToString("N2"))</strong></span>
+            </div>
+        </div>
+
+        <div class="col-sm-6 col-xl-3">
+            <div class="card border-0 shadow-sm p-4 rounded-4 bg-white">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="text-muted small fw-semibold">Active Students</span>
+                    <div class="rounded-3 bg-primary bg-opacity-10 text-primary p-2">
+                        <i class="bi bi-mortarboard-fill fs-4"></i>
+                    </div>
+                </div>
+                <h3 class="fw-bold text-dark mb-0">@analytics.TotalStudents</h3>
+                <span class="text-primary small fw-semibold">Registered learners</span>
+            </div>
+        </div>
+
+        <div class="col-sm-6 col-xl-3">
+            <div class="card border-0 shadow-sm p-4 rounded-4 bg-white">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="text-muted small fw-semibold">Course Completion Rate</span>
+                    <div class="rounded-3 bg-warning bg-opacity-10 text-warning p-2">
+                        <i class="bi bi-award-fill fs-4"></i>
+                    </div>
+                </div>
+                <h3 class="fw-bold text-dark mb-0">@analytics.AverageCompletionRate%</h3>
+                <span class="text-success small fw-semibold">High learner engagement</span>
+            </div>
+        </div>
+
+        <div class="col-sm-6 col-xl-3">
+            <div class="card border-0 shadow-sm p-4 rounded-4 bg-white">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="text-muted small fw-semibold">Pending Approval</span>
+                    <div class="rounded-3 bg-danger bg-opacity-10 text-danger p-2">
+                        <i class="bi bi-clock-history fs-4"></i>
+                    </div>
+                </div>
+                <h3 class="fw-bold text-dark mb-0">@analytics.PendingApprovalCourses</h3>
+                <span class="text-danger small fw-semibold">Awaiting review</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chart.js Visualizations (4 Charts) -->
+    <div class="row g-4 mb-4">
+        <!-- Monthly Revenue Trends Line Chart -->
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm p-4 rounded-4 bg-white h-100">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="fw-bold mb-0">Platform Monthly Revenue Trends</h5>
+                    <span class="badge bg-light text-muted border">Last 6 Months</span>
+                </div>
+                <div style="height: 300px;">
+                    <canvas id="revenueTrendChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Best-Selling Courses Bar Chart -->
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm p-4 rounded-4 bg-white h-100">
+                <h5 class="fw-bold mb-3">Best-Selling Courses</h5>
+                <div style="height: 300px;">
+                    <canvas id="bestSellersChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4 mb-5">
+        <!-- Completion Rates Donut Chart -->
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm p-4 rounded-4 bg-white h-100">
+                <h5 class="fw-bold mb-3">Course Completion Rates (%)</h5>
+                <div style="height: 280px;">
+                    <canvas id="completionRatesChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Category Distribution Chart -->
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm p-4 rounded-4 bg-white h-100">
+                <h5 class="fw-bold mb-3">Category Distribution</h5>
+                <div style="height: 280px;">
+                    <canvas id="categoryDistributionChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pending Approval Courses Table -->
+    @if (Model.PendingCourses.Any())
+    {
+        <div class="card border-0 shadow-sm rounded-4 overflow-hidden bg-white mb-4 border-start border-warning border-4">
+            <div class="p-4 border-bottom d-flex justify-content-between align-items-center">
+                <div class="d-flex align-items-center gap-2">
+                    <i class="bi bi-exclamation-triangle-fill text-warning fs-5"></i>
+                    <h5 class="fw-bold mb-0">Courses Awaiting Admin Approval</h5>
+                </div>
+                <a asp-action="Courses" class="small fw-semibold text-decoration-none">Review Queue &rarr;</a>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="ps-4">Course</th>
+                            <th>Instructor</th>
+                            <th>Category</th>
+                            <th>Price</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var c in Model.PendingCourses)
+                        {
+                            <tr>
+                                <td class="ps-4 fw-bold">@c.Title</td>
+                                <td>@(c.Instructor?.FullName ?? "Instructor")</td>
+                                <td>@(c.Category?.Name ?? "General")</td>
+                                <td>$@((c.DiscountPrice ?? c.Price).ToString("F2"))</td>
+                                <td>
+                                    <div class="d-flex gap-2">
+                                        <form asp-action="ApproveCourse" asp-route-id="@c.Id" method="post" class="d-inline">
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="btn btn-sm btn-success rounded-pill px-3">
+                                                <i class="bi bi-check-lg me-1"></i> Approve
+                                            </button>
+                                        </form>
+                                        <form asp-action="RejectCourse" asp-route-id="@c.Id" method="post" class="d-inline">
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill px-3">
+                                                Reject
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        const monthLabels = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(analytics.MonthlyLabels));
+        const monthRevenue = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(analytics.MonthlyRevenueData));
+
+        const bestSellerTitles = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(analytics.BestSellingCourseTitles));
+        const bestSellerCounts = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(analytics.BestSellingCourseEnrollments));
+
+        const completionTitles = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(analytics.CompletionCourseTitles));
+        const completionRates = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(analytics.CompletionRates));
+
+        const categoryLabels = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(analytics.CategoryLabels));
+        const categoryCounts = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(analytics.CategoryCourseCounts));
+
+        // 1. Monthly Revenue Trends Line Chart
+        new Chart(document.getElementById('revenueTrendChart'), {
+            type: 'line',
+            data: {
+                labels: monthLabels,
+                datasets: [{
+                    label: 'Platform Revenue ($)',
+                    data: monthRevenue,
+                    borderColor: '#6366f1',
+                    backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                    tension: 0.35,
+                    fill: true,
+                    pointRadius: 5,
+                    pointHoverRadius: 7
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: { y: { beginAtZero: true } }
+            }
+        });
+
+        // 2. Best-Selling Courses Bar Chart
+        new Chart(document.getElementById('bestSellersChart'), {
+            type: 'bar',
+            data: {
+                labels: bestSellerTitles,
+                datasets: [{
+                    label: 'Enrollments',
+                    data: bestSellerCounts,
+                    backgroundColor: ['#6366f1', '#0ea5e9', '#10b981', '#f59e0b', '#ec4899'],
+                    borderRadius: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } }
+            }
+        });
+
+        // 3. Course Completion Rates Donut Chart
+        new Chart(document.getElementById('completionRatesChart'), {
+            type: 'doughnut',
+            data: {
+                labels: completionTitles,
+                datasets: [{
+                    data: completionRates,
+                    backgroundColor: ['#10b981', '#6366f1', '#f59e0b', '#0ea5e9', '#8b5cf6']
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false
+            }
+        });
+
+        // 4. Category Breakdown Polar Chart
+        new Chart(document.getElementById('categoryDistributionChart'), {
+            type: 'polarArea',
+            data: {
+                labels: categoryLabels,
+                datasets: [{
+                    data: categoryCounts,
+                    backgroundColor: ['rgba(99, 102, 241, 0.7)', 'rgba(14, 165, 233, 0.7)', 'rgba(16, 185, 129, 0.7)', 'rgba(245, 158, 11, 0.7)']
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false
+            }
+        });
+    </script>
+}

@@ -1,0 +1,523 @@
+@model EduHub.Services.Interfaces.LearningDashboardDto
+@{
+    ViewData["Title"] = $"{Model.CurrentLesson.Title} - {Model.Course.Title}";
+    ViewData["HideNavbar"] = true;
+    ViewData["HideFooter"] = true;
+    var enrollment = Model.Enrollment;
+    var course = Model.Course;
+    var currentLesson = Model.CurrentLesson;
+    string streamingUrl = ViewBag.StreamingVideoUrl as string ?? currentLesson.VideoUrl ?? "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4";
+
+    var allLessons = course.Sections
+        .OrderBy(s => s.OrderIndex)
+        .SelectMany(s => s.Lessons.OrderBy(l => l.OrderIndex))
+        .ToList();
+
+    int currentIndex = allLessons.FindIndex(l => l.Id == currentLesson.Id);
+    var prevLesson = currentIndex > 0 ? allLessons[currentIndex - 1] : null;
+    var nextLesson = currentIndex >= 0 && currentIndex < allLessons.Count - 1 ? allLessons[currentIndex + 1] : null;
+    bool isCurrentLessonCompleted = Model.CompletedLessonIds.Contains(currentLesson.Id);
+}
+
+@section Styles {
+    <style>
+        .classroom-header {
+            background-color: #0f172a;
+            color: #ffffff;
+            padding: 0.75rem 1.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .classroom-wrapper {
+            background-color: #0b1120;
+            min-height: calc(100vh - 55px);
+        }
+
+        .video-container {
+            background-color: #000000;
+            border-radius: 0.75rem;
+            overflow: hidden;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+            width: 100%;
+            position: relative;
+        }
+
+        .video-container .video-js {
+            width: 100% !important;
+            border-radius: 0.75rem;
+        }
+
+        .video-container .vjs-tech {
+            object-fit: contain;
+        }
+
+        .curriculum-sidebar {
+            background-color: #ffffff;
+            border-left: 1px solid #e2e8f0;
+            height: calc(100vh - 70px);
+            overflow-y: auto;
+        }
+
+        .lesson-nav-item {
+            transition: background 0.15s ease;
+            cursor: pointer;
+            border-left: 3px solid transparent;
+        }
+
+        .lesson-nav-item:hover {
+            background-color: #f8fafc;
+        }
+
+        .lesson-nav-item.active {
+            background-color: #eef2ff;
+            border-left-color: #6366f1;
+        }
+
+        .timestamp-pill {
+            background: #e2e8f0;
+            color: #1e293b;
+            font-size: 0.75rem;
+            padding: 0.15rem 0.5rem;
+            border-radius: 50rem;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .timestamp-pill:hover {
+            background: #6366f1;
+            color: #ffffff;
+        }
+    </style>
+}
+
+<!-- Distraction-free Classroom Header -->
+<div class="classroom-header d-flex justify-content-between align-items-center flex-wrap gap-2 sticky-top" style="z-index: 1020;">
+    <div class="d-flex align-items-center gap-3">
+        <a asp-action="MyCourses" class="btn btn-sm btn-outline-light rounded-pill px-3">
+            <i class="bi bi-arrow-left me-1"></i> My Courses
+        </a>
+        <div class="border-start border-secondary ps-3 d-none d-md-block">
+            <h6 class="mb-0 text-white fw-bold line-clamp-1">@course.Title</h6>
+            <span class="text-white-50 small">Lesson: @currentLesson.Title</span>
+        </div>
+    </div>
+
+    <!-- Progress Meter & Certificate Pill -->
+    <div class="d-flex align-items-center gap-3">
+        <div class="d-flex align-items-center gap-2">
+            <span class="small text-white-50 d-none d-sm-inline">Progress:</span>
+            <div class="progress" style="width: 130px; height: 10px; background-color: rgba(255, 255, 255, 0.2);">
+                <div class="progress-bar bg-success progress-bar-striped progress-bar-animated" id="courseProgressBar" role="progressbar" style="width: @(enrollment.ProgressPercentage)%"></div>
+            </div>
+            <span class="small fw-bold text-white" id="progressText">@(enrollment.ProgressPercentage.ToString("F0"))%</span>
+        </div>
+
+        @if (enrollment.IsCompleted || enrollment.ProgressPercentage >= 100)
+        {
+            <a asp-controller="Certificate" asp-action="ViewByEnrollment" asp-route-enrollmentId="@enrollment.Id" class="btn btn-sm btn-warning fw-bold rounded-pill px-3 shadow-sm animate__animated animate__pulse">
+                <i class="bi bi-award-fill me-1"></i> Get Certificate
+            </a>
+        }
+    </div>
+</div>
+
+<!-- Main Classroom Grid -->
+<div class="container-fluid px-0 classroom-wrapper">
+    <div class="row g-0">
+        <!-- Video Player & Tabs Area (Left 8-9 cols) -->
+        <div class="col-lg-8 col-xl-9 p-3 p-md-4">
+            <!-- Video.js Player -->
+            <div class="video-container mb-4">
+                <video id="classroomVideo"
+                       class="video-js vjs-default-skin vjs-big-play-centered vjs-16-9"
+                       controls
+                       preload="auto"
+                       data-setup='{"fluid": true, "playbackRates": [0.5, 0.75, 1, 1.25, 1.5, 2]}'>
+                    <source src="@streamingUrl" type="video/mp4" />
+                    <p class="vjs-no-js">
+                        To view this video please enable JavaScript, and consider upgrading to a web browser that supports HTML5 video.
+                    </p>
+                </video>
+            </div>
+
+            <!-- Lesson Control Bar -->
+            <div class="card border-0 shadow-sm p-4 rounded-4 bg-white mb-4">
+                <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-3">
+                    <div>
+                        <span class="badge bg-primary bg-opacity-10 text-primary mb-1">Module @(course.Sections.FirstOrDefault(s => s.Lessons.Any(l => l.Id == currentLesson.Id))?.OrderIndex ?? 1)</span>
+                        <h4 class="fw-bold mb-1">@currentLesson.Title</h4>
+                        <span class="text-muted small"><i class="bi bi-clock me-1"></i> @currentLesson.DurationMinutes mins</span>
+                    </div>
+
+                    <div class="d-flex align-items-center gap-2">
+                        <!-- Mark Complete Toggle Button -->
+                        <button type="button" class="btn @(isCurrentLessonCompleted ? "btn-success" : "btn-outline-success") rounded-pill px-3 py-2 fw-semibold" id="btnToggleComplete" onclick="toggleLessonComplete()">
+                            <i class="bi @(isCurrentLessonCompleted ? "bi-check-circle-fill" : "bi-check-circle") me-1"></i>
+                            <span id="completeButtonLabel">@(isCurrentLessonCompleted ? "Completed" : "Mark as Complete")</span>
+                        </button>
+
+                        <!-- Bookmark Button -->
+                        <button type="button" class="btn btn-outline-secondary rounded-pill px-3 py-2" id="btnBookmark" onclick="toggleBookmark()">
+                            <i class="bi bi-bookmark me-1"></i> Bookmark
+                        </button>
+
+                        <!-- Prev / Next Nav -->
+                        @if (prevLesson != null)
+                        {
+                            <a asp-action="Watch" asp-route-id="@course.Id" asp-route-lessonId="@prevLesson.Id" class="btn btn-light rounded-pill px-3 py-2" title="Previous Lesson">
+                                <i class="bi bi-chevron-left"></i>
+                            </a>
+                        }
+                        @if (nextLesson != null)
+                        {
+                            <a asp-action="Watch" asp-route-id="@course.Id" asp-route-lessonId="@nextLesson.Id" class="btn btn-primary rounded-pill px-3 py-2" title="Next Lesson">
+                                Next <i class="bi bi-chevron-right ms-1"></i>
+                            </a>
+                        }
+                    </div>
+                </div>
+
+                <!-- Tabs: Notes, Overview, Discussion -->
+                <ul class="nav nav-tabs border-bottom mb-3" id="lessonTabs" role="tablist">
+                    <li class="nav-item">
+                        <button class="nav-link active fw-semibold" id="notes-tab" data-bs-toggle="tab" data-bs-target="#notes" type="button" role="tab">
+                            <i class="bi bi-journal-text me-1"></i> Notes (<span id="notesCount">@Model.Notes.Count</span>)
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link fw-semibold" id="overview-tab" data-bs-toggle="tab" data-bs-target="#overview" type="button" role="tab">
+                            <i class="bi bi-info-circle me-1"></i> Overview
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link fw-semibold" id="qa-tab" data-bs-toggle="tab" data-bs-target="#qa" type="button" role="tab">
+                            <i class="bi bi-chat-square-dots me-1"></i> Q&A Forum
+                        </button>
+                    </li>
+                </ul>
+
+                <div class="tab-content" id="lessonTabsContent">
+                    <!-- Tab 1: Time-synced Note Taking -->
+                    <div class="tab-pane fade show active" id="notes" role="tabpanel">
+                        <!-- Add Note Form -->
+                        <div class="p-3 bg-light rounded-3 border mb-3">
+                            <label class="form-label small fw-bold text-dark mb-1">Take a Note at Current Timestamp</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-white small fw-bold" id="currentNoteTimestamp">00:00</span>
+                                <input type="text" class="form-control" id="noteInput" placeholder="Write a note about this concept..." />
+                                <button class="btn btn-primary px-3" type="button" onclick="saveNote()">
+                                    <i class="bi bi-plus-circle me-1"></i> Save Note
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Notes List -->
+                        <div id="notesContainer" class="d-flex flex-column gap-2">
+                            @foreach (var note in Model.Notes)
+                            {
+                                <div class="p-3 rounded-3 bg-white border d-flex justify-content-between align-items-center" id="noteItem_@note.Id">
+                                    <div class="d-flex align-items-center gap-3">
+                                        <span class="timestamp-pill" onclick="jumpToSeconds(@note.TimestampSeconds)">
+                                            <i class="bi bi-play-fill"></i> @TimeSpan.FromSeconds(note.TimestampSeconds).ToString(@"mm\:ss")
+                                        </span>
+                                        <span class="small text-dark">@note.Content</span>
+                                    </div>
+                                    <button type="button" class="btn btn-link text-danger p-0" onclick="deleteNote(@note.Id)">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </div>
+                            }
+                        </div>
+                    </div>
+
+                    <!-- Tab 2: Overview -->
+                    <div class="tab-pane fade" id="overview" role="tabpanel">
+                        <h6 class="fw-bold mb-2">Lesson Notes & Resources</h6>
+                        <p class="text-secondary small">
+                            @(string.IsNullOrEmpty(currentLesson.ContentNotes) ? "No additional written notes for this lesson." : currentLesson.ContentNotes)
+                        </p>
+                    </div>
+
+                    <!-- Tab 3: Q&A -->
+                    <div class="tab-pane fade" id="qa" role="tabpanel">
+                        <div class="alert alert-light border small text-muted">
+                            <i class="bi bi-info-circle me-1"></i> Have a question about this lecture? Ask below and the instructor or peers will respond.
+                        </div>
+                        <div class="input-group mb-3">
+                            <input type="text" class="form-control" placeholder="Ask a question..." />
+                            <button class="btn btn-outline-primary" type="button">Post Question</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Curriculum Playlist Sidebar (Right 3-4 cols) -->
+        <div class="col-lg-4 col-xl-3 curriculum-sidebar p-3">
+            <h5 class="fw-bold mb-3 px-2">Course Curriculum</h5>
+
+            <div class="accordion border-0" id="sidebarAccordion">
+                @foreach (var sec in course.Sections.OrderBy(s => s.OrderIndex))
+                {
+                    bool isCurrentSection = sec.Lessons.Any(l => l.Id == currentLesson.Id);
+
+                    <div class="accordion-item border-0 mb-2 rounded-3 overflow-hidden shadow-sm">
+                        <h2 class="accordion-header" id="sideHeading_@sec.Id">
+                            <button class="accordion-button @(isCurrentSection ? "" : "collapsed") bg-light py-2 px-3 fw-bold small" type="button" data-bs-toggle="collapse" data-bs-target="#sideCollapse_@sec.Id">
+                                @sec.Title
+                            </button>
+                        </h2>
+                        <div id="sideCollapse_@sec.Id" class="accordion-collapse collapse @(isCurrentSection ? "show" : "")" data-bs-parent="#sidebarAccordion">
+                            <div class="accordion-body p-0">
+                                <ul class="list-group list-group-flush small">
+                                    @foreach (var lesson in sec.Lessons.OrderBy(l => l.OrderIndex))
+                                    {
+                                        bool isCompleted = Model.CompletedLessonIds.Contains(lesson.Id);
+                                        bool isActive = lesson.Id == currentLesson.Id;
+
+                                        <li class="list-group-item p-0">
+                                            <a asp-action="Watch" asp-route-id="@course.Id" asp-route-lessonId="@lesson.Id" class="d-flex justify-content-between align-items-center p-3 text-decoration-none lesson-nav-item @(isActive ? "active" : "")">
+                                                <div class="d-flex align-items-center gap-2">
+                                                    <i class="bi @(isCompleted ? "bi-check-circle-fill text-success" : "bi-circle text-muted") fs-5" id="lessonCheck_@lesson.Id"></i>
+                                                    <span class="@(isActive ? "fw-bold text-primary" : "text-dark")">@lesson.Title</span>
+                                                </div>
+                                                <span class="text-muted" style="font-size: 0.75rem;">@lesson.DurationMinutes m</span>
+                                            </a>
+                                        </li>
+                                    }
+
+                                    @foreach (var quiz in sec.Quizzes)
+                                    {
+                                        <li class="list-group-item p-0">
+                                            <a asp-action="Quiz" asp-route-id="@quiz.Id" class="d-flex justify-content-between align-items-center p-3 text-decoration-none bg-light lesson-nav-item">
+                                                <div class="d-flex align-items-center gap-2">
+                                                    <i class="bi bi-question-diamond-fill text-warning fs-5"></i>
+                                                    <span class="fw-bold text-dark">Quiz: @quiz.Title</span>
+                                                </div>
+                                                <span class="badge bg-warning text-dark" style="font-size: 0.7rem;">Test</span>
+                                            </a>
+                                        </li>
+                                    }
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@Html.AntiForgeryToken()
+
+@section Scripts {
+    <script>
+        let player = null;
+        const lessonId = @currentLesson.Id;
+        const initialPosition = @Model.LastWatchPositionSeconds;
+        let isCompleted = @(isCurrentLessonCompleted.ToString().ToLower());
+
+        document.addEventListener('DOMContentLoaded', function () {
+            // Initialize Video.js Player
+            player = videojs('classroomVideo');
+
+            player.ready(function () {
+                // Resume from last watched position
+                if (initialPosition > 0) {
+                    player.currentTime(initialPosition);
+                }
+
+                // Update note timestamp label
+                player.on('timeupdate', function () {
+                    const sec = Math.floor(player.currentTime());
+                    const m = Math.floor(sec / 60).toString().padStart(2, '0');
+                    const s = (sec % 60).toString().padStart(2, '0');
+                    document.getElementById('currentNoteTimestamp').innerText = `${m}:${s}`;
+                });
+
+                // Periodic position auto-save every 10 seconds
+                setInterval(function () {
+                    if (!player.paused()) {
+                        saveWatchPosition(Math.floor(player.currentTime()));
+                    }
+                }, 10000);
+
+                // Auto-mark completed on video end
+                player.on('ended', function () {
+                    if (!isCompleted) {
+                        toggleLessonComplete();
+                    }
+                });
+            });
+        });
+
+        function jumpToSeconds(sec) {
+            if (player) {
+                player.currentTime(sec);
+                player.play();
+            }
+        }
+
+        async function saveWatchPosition(sec) {
+            const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
+            const formData = new FormData();
+            formData.append('lessonId', lessonId);
+            formData.append('seconds', sec);
+
+            try {
+                await fetch('/Learning/SavePosition', {
+                    method: 'POST',
+                    headers: { 'RequestVerificationToken': token },
+                    body: formData
+                });
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        async function toggleLessonComplete() {
+            const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
+            const targetState = !isCompleted;
+            const formData = new FormData();
+            formData.append('lessonId', lessonId);
+            formData.append('isCompleted', targetState);
+            if (token) {
+                formData.append('__RequestVerificationToken', token);
+            }
+
+            const btn = document.getElementById('btnToggleComplete');
+            if (btn) btn.disabled = true;
+
+            try {
+                const response = await fetch('/Learning/ToggleComplete', {
+                    method: 'POST',
+                    headers: { 'RequestVerificationToken': token },
+                    body: formData
+                });
+                const res = await response.json();
+                if (res.success) {
+                    isCompleted = targetState;
+                    const label = document.getElementById('completeButtonLabel');
+                    const checkIcon = document.getElementById(`lessonCheck_${lessonId}`);
+
+                    if (isCompleted) {
+                        btn.className = 'btn btn-success rounded-pill px-3 py-2 fw-semibold';
+                        label.innerText = 'Completed';
+                        if (checkIcon) checkIcon.className = 'bi bi-check-circle-fill text-success fs-5';
+                    } else {
+                        btn.className = 'btn btn-outline-success rounded-pill px-3 py-2 fw-semibold';
+                        label.innerText = 'Mark as Complete';
+                        if (checkIcon) checkIcon.className = 'bi bi-circle text-muted fs-5';
+                    }
+
+                    // Update progress meter
+                    const progressBar = document.getElementById('courseProgressBar');
+                    const progressText = document.getElementById('progressText');
+                    if (progressBar) progressBar.style.width = `${res.progress}%`;
+                    if (progressText) progressText.innerText = `${Math.round(res.progress)}%`;
+
+                    if (res.progress >= 100) {
+                        alert('🎉 Congratulations! You have completed 100% of this course! Refreshing to show your Certificate...');
+                        location.reload();
+                    }
+                } else {
+                    alert('Could not update lesson progress: ' + (res.message || 'Unknown error'));
+                }
+            } catch (err) {
+                console.error(err);
+                alert('Connection error while updating progress: ' + err.message);
+            } finally {
+                if (btn) btn.disabled = false;
+            }
+        }
+
+        async function saveNote() {
+            const input = document.getElementById('noteInput');
+            const content = input.value.trim();
+            if (!content) return;
+
+            const sec = player ? Math.floor(player.currentTime()) : 0;
+            const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
+
+            const formData = new FormData();
+            formData.append('lessonId', lessonId);
+            formData.append('timestampSeconds', sec);
+            formData.append('content', content);
+
+            try {
+                const response = await fetch('/Learning/AddNote', {
+                    method: 'POST',
+                    headers: { 'RequestVerificationToken': token },
+                    body: formData
+                });
+                const res = await response.json();
+                if (res.success) {
+                    input.value = '';
+                    const container = document.getElementById('notesContainer');
+                    const noteDiv = document.createElement('div');
+                    noteDiv.className = 'p-3 rounded-3 bg-white border d-flex justify-content-between align-items-center';
+                    noteDiv.id = `noteItem_${res.id}`;
+                    noteDiv.innerHTML = `
+                        <div class="d-flex align-items-center gap-3">
+                            <span class="timestamp-pill" onclick="jumpToSeconds(${res.timestampSeconds})">
+                                <i class="bi bi-play-fill"></i> ${res.formattedTime}
+                            </span>
+                            <span class="small text-dark">${res.content}</span>
+                        </div>
+                        <button type="button" class="btn btn-link text-danger p-0" onclick="deleteNote(${res.id})">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    `;
+                    container.prepend(noteDiv);
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        async function deleteNote(id) {
+            const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
+            const formData = new FormData();
+            formData.append('noteId', id);
+
+            try {
+                const res = await fetch('/Learning/DeleteNote', {
+                    method: 'POST',
+                    headers: { 'RequestVerificationToken': token },
+                    body: formData
+                });
+                const data = await res.json();
+                if (data.success) {
+                    document.getElementById(`noteItem_${id}`)?.remove();
+                }
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        async function toggleBookmark() {
+            const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
+            const formData = new FormData();
+            formData.append('lessonId', lessonId);
+
+            try {
+                const res = await fetch('/Learning/ToggleBookmark', {
+                    method: 'POST',
+                    headers: { 'RequestVerificationToken': token },
+                    body: formData
+                });
+                const data = await res.json();
+                const btn = document.getElementById('btnBookmark');
+                if (data.isBookmarked) {
+                    btn.className = 'btn btn-secondary rounded-pill px-3 py-2';
+                    btn.innerHTML = '<i class="bi bi-bookmark-fill me-1"></i> Bookmarked';
+                } else {
+                    btn.className = 'btn btn-outline-secondary rounded-pill px-3 py-2';
+                    btn.innerHTML = '<i class="bi bi-bookmark me-1"></i> Bookmark';
+                }
+            } catch (e) {
+                console.error(e);
+            }
+        }
+    </script>
+}
